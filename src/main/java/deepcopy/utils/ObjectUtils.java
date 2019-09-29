@@ -11,6 +11,7 @@ public class ObjectUtils<T> {
     public T copy(T initialObject) throws IllegalAccessException, InstantiationException {
         Class<?> initialClass = initialObject.getClass();
         resultObject = initialClass.newInstance();
+        /* todo use java.lang.reflect.Constructor#newInstance(java.lang.Object...) Constructor.newInstance*/
 
         for (Field field : initialClass.getDeclaredFields()) {
             field.setAccessible(Boolean.TRUE);
@@ -31,26 +32,43 @@ public class ObjectUtils<T> {
             } else if (field.getType().isEnum()) {
                 System.out.println("enum");
             } else if (field.getType().equals(Dummy.class)) {
-                Class<?> innerObjectClass = field.getType();
-                Object innerObject = field.get(initialObject);
-                Object innerObjectCopy = innerObjectClass.newInstance();
-
-                for (Field subField : innerObjectClass.getDeclaredFields()) {
-                    subField.setAccessible(Boolean.TRUE);
-                    System.out.println(subField.get(innerObject));
-                    subField.set(innerObjectCopy, subField.get(innerObject));
-                }
-
-//                for (Field subField : innerObjectClass.getDeclaredFields()) {
-//                    subField.setAccessible(Boolean.TRUE);
-//                    System.out.println(subField.getName() + " " + subField.get(innerObjectCopy));
-//                    subField.set(innerObjectCopy, subField.get(innerObjectCopy));
-//                }
-
-                field.set(resultObject, innerObjectCopy);
+                field.set(resultObject, copyFieldObject(field, initialObject));
             }
         }
 
         return (T) resultObject;
+    }
+
+    private Object copyFieldObject(Field field, Object initialObject) throws IllegalAccessException, InstantiationException {
+        Class<?> innerObjectClass = field.getType();
+        Object innerObject = field.get(initialObject);
+        Object innerObjectCopy = innerObjectClass.newInstance();
+
+        for (Field subField : innerObjectClass.getDeclaredFields()) {
+            subField.setAccessible(Boolean.TRUE);
+            subField.set(innerObjectCopy, subField.get(innerObject));
+
+
+//            if (field.getType().equals(Byte.class) ||
+//                    field.getType().equals(Short.class) ||
+//                    field.getType().equals(Integer.class) ||
+//                    field.getType().equals(Long.class) ||
+//                    field.getType().equals(Float.class) ||
+//                    field.getType().equals(Double.class) ||
+//                    field.getType().equals(Boolean.class) ||
+//                    field.getType().equals(Character.class) ||
+//                    field.getType().equals(String.class)
+//            ) {
+//                subField.set(innerObjectCopy, subField.get(innerObject));
+//            } else if (field.getType().isArray()) {
+//                System.out.println("array");
+//            } else if (field.getType().isEnum()) {
+//                System.out.println("enum");
+//            } else if (field.getType().equals(Dummy.class)) {
+//                subField.set(innerObjectCopy, copyFieldObject(subField, innerObjectCopy));
+//            }
+        }
+
+        return innerObjectCopy;
     }
 }
