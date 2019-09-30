@@ -46,27 +46,20 @@ public class ObjectUtils<T> {
 
         for (Field subField : innerObjectClass.getDeclaredFields()) {
             subField.setAccessible(Boolean.TRUE);
-            subField.set(innerObjectCopy, subField.get(innerObject));
-
-
-//            if (field.getType().equals(Byte.class) ||
-//                    field.getType().equals(Short.class) ||
-//                    field.getType().equals(Integer.class) ||
-//                    field.getType().equals(Long.class) ||
-//                    field.getType().equals(Float.class) ||
-//                    field.getType().equals(Double.class) ||
-//                    field.getType().equals(Boolean.class) ||
-//                    field.getType().equals(Character.class) ||
-//                    field.getType().equals(String.class)
-//            ) {
-//                subField.set(innerObjectCopy, subField.get(innerObject));
-//            } else if (field.getType().isArray()) {
-//                System.out.println("array");
-//            } else if (field.getType().isEnum()) {
-//                System.out.println("enum");
-//            } else if (field.getType().equals(Dummy.class)) {
-//                subField.set(innerObjectCopy, copyFieldObject(subField, innerObjectCopy));
-//            }
+            if (subField.getType().equals(Byte.class) ||
+                    subField.getType().equals(Short.class) ||
+                    subField.getType().equals(Integer.class) ||
+                    subField.getType().equals(Long.class) ||
+                    subField.getType().equals(Float.class) ||
+                    subField.getType().equals(Double.class) ||
+                    subField.getType().equals(Boolean.class) ||
+                    subField.getType().equals(Character.class) ||
+                    subField.getType().equals(String.class)
+            ) {
+                subField.set(innerObjectCopy, subField.get(innerObject));
+            } else /*if (subField.getType().equals(Dummy.class))*/ {
+                subField.set(innerObjectCopy, copyFieldObject(subField, innerObject));
+            }
         }
 
         return innerObjectCopy;
