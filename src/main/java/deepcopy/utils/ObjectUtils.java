@@ -3,12 +3,15 @@ package deepcopy.utils;
 import deepcopy.objects.Dummy;
 
 import java.lang.reflect.Field;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ObjectUtils<T> {
 
-    Object resultObject;
+    private Object resultObject;
+    private Map<String, Object> innerObjectsStorage = new HashMap<>();
 
-    public T copy2(T initialObject) throws IllegalAccessException, InstantiationException {
+    public Object copy2(Object initialObject) throws IllegalAccessException, InstantiationException {
         Class<?> initialClass = initialObject.getClass();
         resultObject = initialClass.newInstance();
 
@@ -17,18 +20,23 @@ public class ObjectUtils<T> {
             field.set(resultObject, copyField(field, initialObject));
         }
 
-        return (T) resultObject;
+        // TODO:
+        // если такого объекта нет, положить его в мапу
+        // innerObjectsStorage.put("someObjectId", copied object);
+        return resultObject;
     }
 
-    private Object copyField(Field field, Object initialObject) throws IllegalAccessException {
+    private Object copyField(Field field, Object initialObject) throws IllegalAccessException, InstantiationException {
         Class<?> fieldClass = field.getType();
         Object fieldToCopy = field.get(initialObject);
         if (fieldToCopy == null) {
             return null;
         } else if (fieldClass.isPrimitive() || isSimpleField(field)) {
             return fieldToCopy;
+        } else {
+            // поискать поле-объект в мапе, если нет - слонировать и добавить в мапу
+            copy2(field.get(initialObject));
         }
-        // TODO: Byte, Short, Integer, Long, Float, Double, Boolean, String, Character
 
         return null;
     }
@@ -54,16 +62,7 @@ public class ObjectUtils<T> {
         for (Field field : initialClass.getDeclaredFields()) {
             field.setAccessible(Boolean.TRUE);
 
-            if (field.getType().equals(Byte.class) ||
-                    field.getType().equals(Short.class) ||
-                    field.getType().equals(Integer.class) ||
-                    field.getType().equals(Long.class) ||
-                    field.getType().equals(Float.class) ||
-                    field.getType().equals(Double.class) ||
-                    field.getType().equals(Boolean.class) ||
-                    field.getType().equals(Character.class) ||
-                    field.getType().equals(String.class)
-            ) {
+            if (isSimpleField(field)) {
                 field.set(resultObject, field.get(initialObject));
             } else if (field.getType().isArray()) {
                 System.out.println("array");
@@ -84,16 +83,7 @@ public class ObjectUtils<T> {
 
         for (Field subField : innerObjectClass.getDeclaredFields()) {
             subField.setAccessible(Boolean.TRUE);
-            if (subField.getType().equals(Byte.class) ||
-                    subField.getType().equals(Short.class) ||
-                    subField.getType().equals(Integer.class) ||
-                    subField.getType().equals(Long.class) ||
-                    subField.getType().equals(Float.class) ||
-                    subField.getType().equals(Double.class) ||
-                    subField.getType().equals(Boolean.class) ||
-                    subField.getType().equals(Character.class) ||
-                    subField.getType().equals(String.class)
-            ) {
+            if (isSimpleField(field)) {
                 subField.set(innerObjectCopy, subField.get(innerObject));
             } else /*if (subField.getType().equals(Dummy.class))*/ {
                 subField.set(innerObjectCopy, copyFieldObject(subField, innerObject));
