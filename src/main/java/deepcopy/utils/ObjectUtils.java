@@ -8,6 +8,44 @@ public class ObjectUtils<T> {
 
     Object resultObject;
 
+    public T copy2(T initialObject) throws IllegalAccessException, InstantiationException {
+        Class<?> initialClass = initialObject.getClass();
+        resultObject = initialClass.newInstance();
+
+        for (Field field : initialClass.getDeclaredFields()) {
+            field.setAccessible(Boolean.TRUE);
+            field.set(resultObject, copyField(field, initialObject));
+        }
+
+        return (T) resultObject;
+    }
+
+    private Object copyField(Field field, Object initialObject) throws IllegalAccessException {
+        Class<?> fieldClass = field.getType();
+        Object fieldToCopy = field.get(initialObject);
+        if (fieldToCopy == null) {
+            return null;
+        } else if (fieldClass.isPrimitive() || isSimpleField(field)) {
+            return fieldToCopy;
+        }
+        // TODO: Byte, Short, Integer, Long, Float, Double, Boolean, String, Character
+
+        return null;
+    }
+
+    private Boolean isSimpleField(Field field) {
+        return
+            field.getType().equals(Byte.class) ||
+            field.getType().equals(Short.class) ||
+            field.getType().equals(Integer.class) ||
+            field.getType().equals(Long.class) ||
+            field.getType().equals(Float.class) ||
+            field.getType().equals(Double.class) ||
+            field.getType().equals(Boolean.class) ||
+            field.getType().equals(Character.class) ||
+            field.getType().equals(String.class);
+    }
+
     public T copy(T initialObject) throws IllegalAccessException, InstantiationException {
         Class<?> initialClass = initialObject.getClass();
         resultObject = initialClass.newInstance();
