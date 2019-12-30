@@ -51,6 +51,7 @@ public class ObjectUtilsTest {
         ClassD instanceOfD2 = new ClassD();
 
         instanceOfB.setClassD(instanceOfD1);
+        instanceOfB.setClassA(inputA);
         instanceOfC.setClassD(instanceOfD1);
         inputA.setClassB(instanceOfB);
         inputA.setClassC(instanceOfC);
@@ -58,20 +59,25 @@ public class ObjectUtilsTest {
 
         ClassA outputA = (ClassA) objectUtils.copy2(inputA);
 
+        //
         assert !getHexCode(inputA.getClassB())
             .equals(getHexCode(outputA.getClassB()));
         assert !getHexCode(inputA.getClassC())
             .equals(getHexCode(outputA.getClassC()));
         assert !getHexCode(inputA.getClassD())
             .equals(getHexCode(outputA.getClassD()));
-
         assert !getHexCode(inputA.getClassB().getClassD())
             .equals(getHexCode(outputA.getClassB().getClassD()));
 
+        // ссылки на разные вложенные объекты одного типа
         assert !getHexCode(outputA.getClassB().getClassD())
             .equals(getHexCode(outputA.getClassD()));
         assert getHexCode(outputA.getClassB().getClassD())
             .equals(getHexCode(outputA.getClassC().getClassD()));
+
+        // обратная ссылка из вложенного объекта на внешний
+        assert getHexCode(outputA)
+            .equals(getHexCode(outputA.getClassB().getClassA()));
     }
 
     private String getHexCode(Object o) {
