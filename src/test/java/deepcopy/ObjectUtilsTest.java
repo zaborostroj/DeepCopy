@@ -4,6 +4,7 @@ import objects.ClassA;
 import objects.ClassB;
 import objects.ClassC;
 import objects.ClassD;
+import objects.ParamConstructor;
 import objects.SimpleFields;
 import org.junit.Test;
 
@@ -82,5 +83,17 @@ public class ObjectUtilsTest {
 
     private String getHexCode(Object o) {
         return Integer.toHexString(System.identityHashCode(o));
+    }
+
+    @Test
+    public void instantiationTest() throws InstantiationException, IllegalAccessException {
+        ObjectUtils objectUtils = new ObjectUtils();
+
+        ParamConstructor input = new ParamConstructor(42);
+
+        ParamConstructor output = (ParamConstructor) objectUtils.copy2(input);
+
+        System.out.println(input);
+        System.out.println(output);
     }
 }

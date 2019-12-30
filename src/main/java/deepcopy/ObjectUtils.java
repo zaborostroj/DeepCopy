@@ -1,20 +1,30 @@
 package deepcopy;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
+import org.objenesis.Objenesis;
+import org.objenesis.ObjenesisStd;
+import org.objenesis.instantiator.ObjectInstantiator;
 
 public class ObjectUtils {
 
     private Map<String, Object> objectsStorage = new HashMap<>();
 
-    public Object copy2(Object initialObject) throws IllegalAccessException, InstantiationException {
+    private Objenesis objenesis = new ObjenesisStd();
+
+    public Object copy2(Object initialObject) throws IllegalAccessException, InstantiationException, NoSuchMethodException {
         Object resultObject;
         String initialObjectId = Integer.toHexString(System.identityHashCode(initialObject)); // https://www.nomachetejuggling.com/2008/06/04/getting-a-java-objects-reference-id/
         Class<?> initialClass = initialObject.getClass();
 
         if (!objectsStorage.containsKey(initialObjectId)) {
-            resultObject = initialClass.newInstance(); // http://objenesis.org/
+//            resultObject = objenesis.newInstance(initialClass);
+//            resultObject = initialClass.newInstance(); // http://objenesis.org/
+            Constructor<Object> javaLangObjectConstructor = Object.class.getConstructor((Class[]) null);
+            Constructor<>
+            resultObject = Constructor.
             objectsStorage.put(initialObjectId, resultObject);
 
             for (Field field : initialClass.getDeclaredFields()) {
