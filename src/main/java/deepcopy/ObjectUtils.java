@@ -2,9 +2,12 @@ package deepcopy;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import org.objenesis.Objenesis;
+import org.objenesis.ObjenesisException;
 import org.objenesis.ObjenesisStd;
 import org.objenesis.instantiator.ObjectInstantiator;
 
@@ -14,7 +17,7 @@ public class ObjectUtils {
 
     private Objenesis objenesis = new ObjenesisStd();
 
-    public Object copy2(Object initialObject) throws IllegalAccessException, InstantiationException, NoSuchMethodException {
+    public Object copy2(Object initialObject) throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
         Object resultObject;
         String initialObjectId = Integer.toHexString(System.identityHashCode(initialObject)); // https://www.nomachetejuggling.com/2008/06/04/getting-a-java-objects-reference-id/
         Class<?> initialClass = initialObject.getClass();
@@ -22,9 +25,13 @@ public class ObjectUtils {
         if (!objectsStorage.containsKey(initialObjectId)) {
 //            resultObject = objenesis.newInstance(initialClass);
 //            resultObject = initialClass.newInstance(); // http://objenesis.org/
-            Constructor<Object> javaLangObjectConstructor = Object.class.getConstructor((Class[]) null);
-            Constructor<>
-            resultObject = Constructor.
+
+            Class<?> reflectionFactoryClass = getReflectionFactoryClass();
+            Object reflectionFactory = createReflectionFactory(reflectionFactoryClass);
+            Method constructor = initialClass.getDeclaredMethod(
+                "newConstructorForSerialization", Class.class, Constructor.class
+            );
+            resultObject = constructor.invoke(reflectionFactory, initialClass, constructor);
             objectsStorage.put(initialObjectId, resultObject);
 
             for (Field field : initialClass.getDeclaredFields()) {
@@ -38,7 +45,27 @@ public class ObjectUtils {
         return resultObject;
     }
 
-    private <T> T copyField(Field field, Object initialObject) throws IllegalAccessException, InstantiationException {
+    private static Class<?> getReflectionFactoryClass() {
+        try {
+            return Class.forName("sun.reflect.ReflectionFactory");
+        }
+        catch(ClassNotFoundException e) {
+            throw new ObjenesisException(e);
+        }
+    }
+
+    private static Object createReflectionFactory(Class<?> reflectionFactoryClass) {
+        try {
+            Method method = reflectionFactoryClass.getDeclaredMethod(
+                "getReflectionFactory");
+            return method.invoke(null);
+        }
+        catch(NoSuchMethodException | IllegalAccessException | InvocationTargetException | IllegalArgumentException e) {
+            throw new ObjenesisException(e);
+        }
+    }
+
+    private <T> T copyField(Field field, Object initialObject) throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
         Class<?> fieldClass = field.getType();
         T fieldToCopy = (T) field.get(initialObject);
         if (fieldToCopy == null) {

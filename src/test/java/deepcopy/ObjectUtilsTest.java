@@ -1,5 +1,6 @@
 package deepcopy;
 
+import java.lang.reflect.InvocationTargetException;
 import objects.ClassA;
 import objects.ClassB;
 import objects.ClassC;
@@ -11,7 +12,7 @@ import org.junit.Test;
 public class ObjectUtilsTest {
 
     @Test
-    public void simpleFieldsCopy() throws InstantiationException, IllegalAccessException {
+    public void simpleFieldsCopy() throws InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
         SimpleFields inputObject = new SimpleFields();
 
         ObjectUtils dummyCopy = new ObjectUtils();
@@ -42,7 +43,7 @@ public class ObjectUtilsTest {
     }
 
     @Test
-    public void innerClassesCopyTest() throws InstantiationException, IllegalAccessException {
+    public void innerClassesCopyTest() throws InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
         ObjectUtils objectUtils = new ObjectUtils();
 
         ClassA inputA = new ClassA();
@@ -86,7 +87,7 @@ public class ObjectUtilsTest {
     }
 
     @Test
-    public void instantiationTest() throws InstantiationException, IllegalAccessException {
+    public void instantiationTest() throws InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
         ObjectUtils objectUtils = new ObjectUtils();
 
         ParamConstructor input = new ParamConstructor(42);
