@@ -1,21 +1,24 @@
 package deepcopy;
 
+import java.lang.reflect.InvocationTargetException;
 import objects.ClassA;
 import objects.ClassB;
 import objects.ClassC;
 import objects.ClassD;
+import objects.ObjectWithStatic;
+import objects.ParamConstructor;
 import objects.SimpleFields;
 import org.junit.Test;
 
 public class ObjectUtilsTest {
 
     @Test
-    public void simpleFieldsCopy() throws InstantiationException, IllegalAccessException {
+    public void simpleFieldsCopy() throws InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException, NoSuchFieldException {
         SimpleFields inputObject = new SimpleFields();
 
         ObjectUtils dummyCopy = new ObjectUtils();
 
-        SimpleFields outputObject = (SimpleFields) dummyCopy.copy2(inputObject);
+        SimpleFields outputObject = (SimpleFields) dummyCopy.copy(inputObject);
 
         inputObject.setPrimitiveIntValue(43);
         inputObject.setByteValue((byte) 43);
@@ -41,7 +44,7 @@ public class ObjectUtilsTest {
     }
 
     @Test
-    public void innerClassesCopyTest() throws InstantiationException, IllegalAccessException {
+    public void innerClassesCopyTest() throws InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException, NoSuchFieldException {
         ObjectUtils objectUtils = new ObjectUtils();
 
         ClassA inputA = new ClassA();
@@ -51,30 +54,62 @@ public class ObjectUtilsTest {
         ClassD instanceOfD2 = new ClassD();
 
         instanceOfB.setClassD(instanceOfD1);
+        instanceOfB.setClassA(inputA);
         instanceOfC.setClassD(instanceOfD1);
         inputA.setClassB(instanceOfB);
         inputA.setClassC(instanceOfC);
         inputA.setClassD(instanceOfD2);
 
-        ClassA outputA = (ClassA) objectUtils.copy2(inputA);
+        ClassA outputA = (ClassA) objectUtils.copy(inputA);
 
+        //
         assert !getHexCode(inputA.getClassB())
             .equals(getHexCode(outputA.getClassB()));
         assert !getHexCode(inputA.getClassC())
             .equals(getHexCode(outputA.getClassC()));
         assert !getHexCode(inputA.getClassD())
             .equals(getHexCode(outputA.getClassD()));
-
         assert !getHexCode(inputA.getClassB().getClassD())
             .equals(getHexCode(outputA.getClassB().getClassD()));
 
+        // ссылки на разные вложенные объекты одного типа
         assert !getHexCode(outputA.getClassB().getClassD())
             .equals(getHexCode(outputA.getClassD()));
         assert getHexCode(outputA.getClassB().getClassD())
             .equals(getHexCode(outputA.getClassC().getClassD()));
+
+        // обратная ссылка из вложенного объекта на внешний
+        assert getHexCode(outputA)
+            .equals(getHexCode(outputA.getClassB().getClassA()));
     }
 
     private String getHexCode(Object o) {
         return Integer.toHexString(System.identityHashCode(o));
+    }
+
+    @Test
+    public void objectWithoutDefaultConstructorCloneTest() throws InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException, NoSuchFieldException {
+        ObjectUtils objectUtils = new ObjectUtils();
+
+        ParamConstructor input = new ParamConstructor(42);
+
+        ParamConstructor output = (ParamConstructor) objectUtils.copy(input);
+
+        input.setAnInt(43);
+
+        assert output.getAnInt() == 42;
+    }
+
+    @Test
+    public void objectWithStaticCloneTest() throws Exception {
+        ObjectUtils objectUtils = new ObjectUtils();
+
+        ObjectWithStatic input = new ObjectWithStatic();
+
+        ObjectWithStatic output = (ObjectWithStatic) objectUtils.copy(input);
+
+        input.setInteger(43);
+
+        assert output.getInteger() == 42;
     }
 }
