@@ -5,6 +5,7 @@ import objects.ClassA;
 import objects.ClassB;
 import objects.ClassC;
 import objects.ClassD;
+import objects.ObjectWithStatic;
 import objects.ParamConstructor;
 import objects.SimpleFields;
 import org.junit.Test;
@@ -12,12 +13,12 @@ import org.junit.Test;
 public class ObjectUtilsTest {
 
     @Test
-    public void simpleFieldsCopy() throws InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
+    public void simpleFieldsCopy() throws InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException, NoSuchFieldException {
         SimpleFields inputObject = new SimpleFields();
 
         ObjectUtils dummyCopy = new ObjectUtils();
 
-        SimpleFields outputObject = (SimpleFields) dummyCopy.copy2(inputObject);
+        SimpleFields outputObject = (SimpleFields) dummyCopy.copy(inputObject);
 
         inputObject.setPrimitiveIntValue(43);
         inputObject.setByteValue((byte) 43);
@@ -43,7 +44,7 @@ public class ObjectUtilsTest {
     }
 
     @Test
-    public void innerClassesCopyTest() throws InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
+    public void innerClassesCopyTest() throws InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException, NoSuchFieldException {
         ObjectUtils objectUtils = new ObjectUtils();
 
         ClassA inputA = new ClassA();
@@ -59,7 +60,7 @@ public class ObjectUtilsTest {
         inputA.setClassC(instanceOfC);
         inputA.setClassD(instanceOfD2);
 
-        ClassA outputA = (ClassA) objectUtils.copy2(inputA);
+        ClassA outputA = (ClassA) objectUtils.copy(inputA);
 
         //
         assert !getHexCode(inputA.getClassB())
@@ -87,14 +88,28 @@ public class ObjectUtilsTest {
     }
 
     @Test
-    public void instantiationTest() throws InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
+    public void objectWithoutDefaultConstructorCloneTest() throws InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException, NoSuchFieldException {
         ObjectUtils objectUtils = new ObjectUtils();
 
         ParamConstructor input = new ParamConstructor(42);
 
-        ParamConstructor output = (ParamConstructor) objectUtils.copy2(input);
+        ParamConstructor output = (ParamConstructor) objectUtils.copy(input);
 
-        System.out.println(input);
-        System.out.println(output);
+        input.setAnInt(43);
+
+        assert output.getAnInt() == 42;
+    }
+
+    @Test
+    public void objectWithStaticCloneTest() throws Exception {
+        ObjectUtils objectUtils = new ObjectUtils();
+
+        ObjectWithStatic input = new ObjectWithStatic();
+
+        ObjectWithStatic output = (ObjectWithStatic) objectUtils.copy(input);
+
+        input.setInteger(43);
+
+        assert output.getInteger() == 42;
     }
 }

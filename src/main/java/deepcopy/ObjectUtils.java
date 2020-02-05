@@ -1,41 +1,43 @@
 package deepcopy;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
-import org.objenesis.Objenesis;
-import org.objenesis.ObjenesisException;
-import org.objenesis.ObjenesisStd;
-import org.objenesis.instantiator.ObjectInstantiator;
+import org.objenesis.instantiator.sun.SunReflectionFactoryInstantiator;
 
 public class ObjectUtils {
 
     private Map<String, Object> objectsStorage = new HashMap<>();
 
-    private Objenesis objenesis = new ObjenesisStd();
-
-    public Object copy2(Object initialObject) throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
+    public Object copy(Object initialObject) throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException, NoSuchFieldException {
         Object resultObject;
         String initialObjectId = Integer.toHexString(System.identityHashCode(initialObject)); // https://www.nomachetejuggling.com/2008/06/04/getting-a-java-objects-reference-id/
         Class<?> initialClass = initialObject.getClass();
 
         if (!objectsStorage.containsKey(initialObjectId)) {
-//            resultObject = objenesis.newInstance(initialClass);
-//            resultObject = initialClass.newInstance(); // http://objenesis.org/
 
-            Class<?> reflectionFactoryClass = getReflectionFactoryClass();
-            Object reflectionFactory = createReflectionFactory(reflectionFactoryClass);
-            Method constructor = initialClass.getDeclaredMethod(
-                "newConstructorForSerialization", Class.class, Constructor.class
-            );
-            resultObject = constructor.invoke(reflectionFactory, initialClass, constructor);
+            /*
+               Инстанцирование объекта при отсутствии дефолтного конструктора.
+               Подсмотрено в http://objenesis.org/
+               SunReflectionFactoryInstantiator создаёт экземпляр объекта без вызова конструктора.
+               Есть и другие типы инстантиаторов под разные JVM
+            */
+            resultObject = new SunReflectionFactoryInstantiator<>(initialClass).newInstance();
+
             objectsStorage.put(initialObjectId, resultObject);
 
             for (Field field : initialClass.getDeclaredFields()) {
                 field.setAccessible(Boolean.TRUE);
+                if (Modifier.isStatic(field.getModifiers())) {
+                    continue;
+                }
+                if (Modifier.isFinal(field.getModifiers())) {
+                    Field modifiers = Field.class.getDeclaredField("modifiers");
+                    modifiers.setAccessible(true);
+                    modifiers.setInt(field, field.getModifiers() & ~Modifier.FINAL);
+                }
                 field.set(resultObject, copyField(field, initialObject));
             }
         } else {
@@ -45,38 +47,22 @@ public class ObjectUtils {
         return resultObject;
     }
 
-    private static Class<?> getReflectionFactoryClass() {
-        try {
-            return Class.forName("sun.reflect.ReflectionFactory");
-        }
-        catch(ClassNotFoundException e) {
-            throw new ObjenesisException(e);
-        }
-    }
-
-    private static Object createReflectionFactory(Class<?> reflectionFactoryClass) {
-        try {
-            Method method = reflectionFactoryClass.getDeclaredMethod(
-                "getReflectionFactory");
-            return method.invoke(null);
-        }
-        catch(NoSuchMethodException | IllegalAccessException | InvocationTargetException | IllegalArgumentException e) {
-            throw new ObjenesisException(e);
-        }
-    }
-
-    private <T> T copyField(Field field, Object initialObject) throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
+    private <T> T copyField(Field field, Object initialObject) throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException, NoSuchFieldException {
         Class<?> fieldClass = field.getType();
         T fieldToCopy = (T) field.get(initialObject);
+        // TODO: сделать ветку для полей-массивов
         if (fieldToCopy == null) {
             return null;
         } else if (fieldClass.isPrimitive() || isSimpleField(field)) {
-            return (T) fieldToCopy;
+            return fieldToCopy;
         } else {
-            return (T) copy2(field.get(initialObject));
+            return (T) copy(field.get(initialObject));
         }
     }
 
+    /**
+     * Введено для упрощения задачи
+     */
     private Boolean isSimpleField(Field field) {
         return
             field.getType().equals(Byte.class) ||

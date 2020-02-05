@@ -1,11 +1,11 @@
 package objects;
 
-public class ObjectWithInteger {
+public class ObjectWithStatic {
 
-    public static final int staticFinalInt = 42;
+    public static final double staticFinalInt = 42.0;
     public static long staticLong = 42L;
 
-    private Integer integer = 43;
+    private Integer integer = 42;
 
     public Integer getInteger() {
         return integer;
