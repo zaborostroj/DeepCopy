@@ -5,20 +5,21 @@ import objects.ClassB;
 import objects.ClassC;
 import objects.ClassD;
 import objects.ObjectWithArray;
+import objects.ObjectWithFinal;
 import objects.ObjectWithStatic;
 import objects.ObjectWithoutDefaultConstructor;
-import objects.SimpleFields;
+import objects.ObjectWithSimpleFields;
 import org.junit.Test;
 
 public class ObjectUtilsTest {
 
     @Test
     public void simpleFieldsCopy() throws ReflectiveOperationException {
-        SimpleFields inputObject = new SimpleFields();
+        ObjectWithSimpleFields inputObject = new ObjectWithSimpleFields();
 
         ObjectUtils dummyCopy = new ObjectUtils();
 
-        SimpleFields outputObject = (SimpleFields) dummyCopy.copy(inputObject);
+        ObjectWithSimpleFields outputObject = (ObjectWithSimpleFields) dummyCopy.copy(inputObject);
 
         inputObject.setPrimitiveIntValue(43);
         inputObject.setByteValue((byte) 43);
@@ -125,5 +126,16 @@ public class ObjectUtilsTest {
 
         assert output.getStrings()[0].equals("1");
         assert output.getStrings()[1].equals("2");
+    }
+
+    @Test
+    public void objectWithFinalCloneTest() throws ReflectiveOperationException {
+        ObjectUtils objectUtils = new ObjectUtils();
+
+        ObjectWithFinal input = new ObjectWithFinal(42);
+
+        ObjectWithFinal output = (ObjectWithFinal) objectUtils.copy(input);
+
+        assert output.getFinalInt() == input.getFinalInt();
     }
 }
