@@ -1,9 +1,9 @@
 package objects;
 
-public class ParamConstructor {
+public class ObjectWithoutDefaultConstructor {
     private int anInt;
 
-    public ParamConstructor(int anInt) {
+    public ObjectWithoutDefaultConstructor(int anInt) {
         this.anInt = anInt;
     }
 

@@ -1,13 +1,12 @@
 package deepcopy;
 
-import java.lang.reflect.InvocationTargetException;
 import objects.ClassA;
 import objects.ClassB;
 import objects.ClassC;
 import objects.ClassD;
 import objects.ObjectWithArray;
 import objects.ObjectWithStatic;
-import objects.ParamConstructor;
+import objects.ObjectWithoutDefaultConstructor;
 import objects.SimpleFields;
 import org.junit.Test;
 
@@ -92,9 +91,9 @@ public class ObjectUtilsTest {
     public void objectWithoutDefaultConstructorCloneTest() throws ReflectiveOperationException {
         ObjectUtils objectUtils = new ObjectUtils();
 
-        ParamConstructor input = new ParamConstructor(42);
+        ObjectWithoutDefaultConstructor input = new ObjectWithoutDefaultConstructor(42);
 
-        ParamConstructor output = (ParamConstructor) objectUtils.copy(input);
+        ObjectWithoutDefaultConstructor output = (ObjectWithoutDefaultConstructor) objectUtils.copy(input);
 
         input.setAnInt(43);
 
