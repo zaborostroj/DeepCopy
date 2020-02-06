@@ -6,9 +6,9 @@ import objects.ClassC;
 import objects.ClassD;
 import objects.ObjectWithArray;
 import objects.ObjectWithFinal;
+import objects.ObjectWithSimpleFields;
 import objects.ObjectWithStatic;
 import objects.ObjectWithoutDefaultConstructor;
-import objects.ObjectWithSimpleFields;
 import org.junit.Test;
 
 public class ObjectUtilsTest {
