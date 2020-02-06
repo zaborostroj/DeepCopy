@@ -1,12 +1,12 @@
 package deepcopy;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
-import org.objenesis.instantiator.sun.SunReflectionFactoryInstantiator;
 
 public class ObjectUtils {
 
@@ -19,13 +19,7 @@ public class ObjectUtils {
 
         if (!objectsStorage.containsKey(initialObjectId)) {
 
-            /*
-               Инстанцирование объекта при отсутствии дефолтного конструктора.
-               Подсмотрено в http://objenesis.org/
-               SunReflectionFactoryInstantiator создаёт экземпляр объекта без вызова конструктора.
-               Есть и другие типы инстантиаторов под разные JVM
-            */
-            resultObject = new SunReflectionFactoryInstantiator<>(initialClass).newInstance();
+            resultObject = getNewInstance(initialClass);
 
             objectsStorage.put(initialObjectId, resultObject);
 
@@ -49,6 +43,34 @@ public class ObjectUtils {
         }
 
         return resultObject;
+    }
+
+    /**
+     * Инстанцирование объекта при отсутствии дефолтного конструктора.
+     * Подсмотрено в http://objenesis.org/
+     * Метод создаёт экземпляр объекта без вызова конструктора.
+     */
+    private <T> T getNewInstance(Class<T> type) throws ReflectiveOperationException {
+        Constructor<Object> javaLangObjectConstructor = Object.class.getConstructor((Class[]) null);
+        Constructor<T> mungedConstructor = newConstructorForSerialization(type, javaLangObjectConstructor);
+        mungedConstructor.setAccessible(true);
+        return mungedConstructor.newInstance((Object[]) null);
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> Constructor<T> newConstructorForSerialization(
+        Class<T> type,
+        Constructor<?> constructor
+    ) throws ReflectiveOperationException {
+        Class<?> reflectionFactoryClass = Class.forName("sun.reflect.ReflectionFactory");
+        Object reflectionFactory = reflectionFactoryClass
+            .getDeclaredMethod("getReflectionFactory")
+            .invoke(null);
+        Method newConstructorForSerializationMethod = reflectionFactoryClass.getDeclaredMethod(
+            "newConstructorForSerialization", Class.class, Constructor.class);
+
+        return (Constructor<T>) newConstructorForSerializationMethod.invoke(
+            reflectionFactory, type, constructor);
     }
 
     @SuppressWarnings("unchecked")
