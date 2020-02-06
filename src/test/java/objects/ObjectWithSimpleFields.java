@@ -1,6 +1,6 @@
 package objects;
 
-public class SimpleFields {
+public class ObjectWithSimpleFields {
     private int primitiveIntValue = 42;
 
     private Byte byteValue = 42;
