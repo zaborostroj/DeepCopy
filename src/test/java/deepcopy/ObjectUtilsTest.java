@@ -5,6 +5,7 @@ import objects.ClassA;
 import objects.ClassB;
 import objects.ClassC;
 import objects.ClassD;
+import objects.ObjectWithArray;
 import objects.ObjectWithStatic;
 import objects.ParamConstructor;
 import objects.SimpleFields;
@@ -13,7 +14,7 @@ import org.junit.Test;
 public class ObjectUtilsTest {
 
     @Test
-    public void simpleFieldsCopy() throws InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException, NoSuchFieldException {
+    public void simpleFieldsCopy() throws ReflectiveOperationException {
         SimpleFields inputObject = new SimpleFields();
 
         ObjectUtils dummyCopy = new ObjectUtils();
@@ -44,7 +45,7 @@ public class ObjectUtilsTest {
     }
 
     @Test
-    public void innerClassesCopyTest() throws InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException, NoSuchFieldException {
+    public void innerClassesCopyTest() throws ReflectiveOperationException {
         ObjectUtils objectUtils = new ObjectUtils();
 
         ClassA inputA = new ClassA();
@@ -88,7 +89,7 @@ public class ObjectUtilsTest {
     }
 
     @Test
-    public void objectWithoutDefaultConstructorCloneTest() throws InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException, NoSuchFieldException {
+    public void objectWithoutDefaultConstructorCloneTest() throws ReflectiveOperationException {
         ObjectUtils objectUtils = new ObjectUtils();
 
         ParamConstructor input = new ParamConstructor(42);
@@ -101,7 +102,7 @@ public class ObjectUtilsTest {
     }
 
     @Test
-    public void objectWithStaticCloneTest() throws Exception {
+    public void objectWithStaticCloneTest() throws ReflectiveOperationException {
         ObjectUtils objectUtils = new ObjectUtils();
 
         ObjectWithStatic input = new ObjectWithStatic();
@@ -111,5 +112,19 @@ public class ObjectUtilsTest {
         input.setInteger(43);
 
         assert output.getInteger() == 42;
+    }
+
+    @Test
+    public void objectWithArrayCloneTest() throws ReflectiveOperationException {
+        ObjectUtils objectUtils = new ObjectUtils();
+
+        ObjectWithArray input = new ObjectWithArray(new String[] {"1", "2"});
+
+        ObjectWithArray output = (ObjectWithArray) objectUtils.copy(input);
+
+        input.setStrings(new String[] {"3", "4"});
+
+        assert output.getStrings()[0].equals("1");
+        assert output.getStrings()[1].equals("2");
     }
 }
