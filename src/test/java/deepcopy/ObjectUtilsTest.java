@@ -132,10 +132,10 @@ public class ObjectUtilsTest {
     public void objectWithFinalCloneTest() throws ReflectiveOperationException {
         ObjectUtils objectUtils = new ObjectUtils();
 
-        ObjectWithFinal input = new ObjectWithFinal(42);
+        ObjectWithFinal input = new ObjectWithFinal(new ClassD());
 
         ObjectWithFinal output = (ObjectWithFinal) objectUtils.copy(input);
 
-        assert output.getFinalInt() == input.getFinalInt();
+        assert !getHexCode(output.getFinalD()).equals(getHexCode(input.getFinalD()));
     }
 }

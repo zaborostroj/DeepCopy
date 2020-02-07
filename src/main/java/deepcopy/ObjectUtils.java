@@ -30,11 +30,11 @@ public class ObjectUtils {
 
                 field.setAccessible(Boolean.TRUE);
 
-                if (Modifier.isFinal(field.getModifiers())) {
-                    Field modifiers = Field.class.getDeclaredField("modifiers");
-                    modifiers.setAccessible(true);
-                    modifiers.setInt(field, field.getModifiers() & ~Modifier.FINAL);
-                }
+//                if (Modifier.isFinal(field.getModifiers())) {
+//                    Field modifiers = Field.class.getDeclaredField("modifiers");
+//                    modifiers.setAccessible(true);
+//                    modifiers.setInt(field, field.getModifiers() & ~Modifier.FINAL);
+//                }
 
                 field.set(resultObject, copyField(field, initialObject));
             }

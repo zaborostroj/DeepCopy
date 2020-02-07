@@ -2,13 +2,13 @@ package objects;
 
 public class ObjectWithFinal {
 
-    private final int finalInt;
+    private final ClassD finalD;
 
-    public ObjectWithFinal(int finalInt) {
-        this.finalInt = finalInt;
+    public ObjectWithFinal(ClassD finalD) {
+        this.finalD = finalD;
     }
 
-    public int getFinalInt() {
-        return finalInt;
+    public ClassD getFinalD() {
+        return finalD;
     }
 }
