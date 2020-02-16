@@ -1,9 +1,12 @@
 package deepcopy;
 
+import java.util.ArrayList;
+import java.util.List;
 import objects.ClassA;
 import objects.ClassB;
 import objects.ClassC;
 import objects.ClassD;
+import objects.Man;
 import objects.ObjectWithArray;
 import objects.ObjectWithFinal;
 import objects.ObjectWithSimpleFields;
@@ -137,5 +140,34 @@ public class ObjectUtilsTest {
         ObjectWithFinal output = (ObjectWithFinal) objectUtils.copy(input);
 
         assert !getHexCode(output.getFinalD()).equals(getHexCode(input.getFinalD()));
+    }
+
+    @Test
+    public void manCloneTest() throws ReflectiveOperationException {
+        ObjectUtils objectUtils = new ObjectUtils();
+
+        List<String> books = new ArrayList<>();
+        books.add("book1");
+        books.add("book2");
+
+        Man input = new Man(
+            "name",
+            42,
+            books
+        );
+
+        Man output = (Man) objectUtils.copy(input);
+
+        List<String> newBooks = new ArrayList<>();
+        newBooks.add("new_book1");
+        newBooks.add("new_book2");
+        input.setName("new_name");
+        input.setAge(43);
+        input.setFavoriteBooks(newBooks);
+
+        assert output.getName().equals("name");
+        assert output.getAge() == 42;
+        assert output.getFavoriteBooks().get(0).equals("book1");
+        assert output.getFavoriteBooks().get(1).equals("book2");
     }
 }
