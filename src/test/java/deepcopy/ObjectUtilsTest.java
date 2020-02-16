@@ -20,9 +20,9 @@ public class ObjectUtilsTest {
     public void simpleFieldsCopy() throws ReflectiveOperationException {
         ObjectWithSimpleFields inputObject = new ObjectWithSimpleFields();
 
-        ObjectUtils dummyCopy = new ObjectUtils();
+        ObjectUtils objectUtils = new ObjectUtils();
 
-        ObjectWithSimpleFields outputObject = (ObjectWithSimpleFields) dummyCopy.copy(inputObject);
+        ObjectWithSimpleFields outputObject = (ObjectWithSimpleFields) objectUtils.copy(inputObject);
 
         inputObject.setPrimitiveIntValue(43);
         inputObject.setByteValue((byte) 43);
